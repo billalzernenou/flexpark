@@ -1,0 +1,70 @@
+frontend/app/*~
+frontend/app/*.sw[mnpcod]
+frontend/app/.tmp
+frontend/app/*.tmp
+frontend/app/*.tmp.*
+frontend/app/UserInterfaceState.xcuserstate
+frontend/app/$RECYCLE.BIN/
+
+frontend/app/*.log
+frontend/app/log.txt
+
+frontend/app/.sourcemaps
+frontend/app/.versions
+frontend/app/coverage
+
+# Ionic
+frontend/app/.ionic
+frontend/app/www
+frontend/app/platforms
+frontend/app/plugins
+
+# Compiled output
+frontend/app/dist
+frontend/app/tmp
+frontend/app/out-tsc
+frontend/app/bazel-out
+
+# Node
+frontend/app/node_modules
+frontend/app/npm-debug.log
+frontend/app/yarn-error.log
+
+# IDEs and editors
+frontend/app/.idea/
+frontend/app/.project
+frontend/app/.classpath
+frontend/app/.c9/
+frontend/app/*.launch
+frontend/app/.settings/
+frontend/app/*.sublime-project
+frontend/app/*.sublime-workspace
+
+# Visual Studio Code
+frontend/app/.vscode/*
+!frontend/app/.vscode/settings.json
+!frontend/app/.vscode/tasks.json
+!frontend/app/.vscode/launch.json
+!frontend/app/.vscode/extensions.json
+frontend/app/.history/*
+
+# Miscellaneous
+frontend/app/.angular
+frontend/app/.angular/cache
+frontend/app/.sass-cache/
+frontend/app/.nx
+frontend/app/.nx/cache
+frontend/app/connect.lock
+frontend/app/coverage
+frontend/app/libpeerconnection.log
+frontend/app/testem.log
+frontend/app/typings
+
+# System files
+frontend/app/.DS_Store
+frontend/app/Thumbs.db
+
+# backend
+backend/venv
+**/__pycache__/
+**/.idea/
