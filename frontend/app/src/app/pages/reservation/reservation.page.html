@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Réservation de parking</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding reservation-root">
+  <!-- Debug info -->
+  <div
+    style="
+      background: #ffffcc;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    "
+  >
+    <strong>Debug:</strong> Utilisateur={{ currentUser?.email }} |
+    Réservations={{ reservations.length }}
+  </div>
+
+  <!-- Utilisateur connecté -->
+  <section class="card user-card" *ngIf="currentUser">
+    <div class="user-info">
+      <strong>Utilisateur connecté:</strong> {{ currentUser.email }}
+    </div>
+  </section>
+
+  <!-- Sélection date -->
+  <section class="card date-card">
+    <div class="card-row single">
+      <div class="card-col">
+        <label for="date" class="date-label">Sélectionnez une date</label>
+        <ion-datetime
+          id="date"
+          presentation="date"
+          display-format="DD/MM/YYYY"
+          placeholder="JJ/MM/AAAA"
+          [(ngModel)]="date"
+          class="custom-date"
+        ></ion-datetime>
+      </div>
+    </div>
+  </section>
+
+  <!-- Affichage des créneaux et réservations -->
+  <section class="card slots-card" *ngIf="date">
+    <h2>Créneaux disponibles pour {{ date }}</h2>
+
+    <!-- Pour chaque parking -->
+    <div *ngFor="let parking of parkings" class="parking-section">
+      <h3>{{ parking.name }}</h3>
+      <div class="slots-grid">
+        <!-- Pour chaque créneau horaire -->
+        <div *ngFor="let slot of slots" class="slot-item">
+          <div class="slot-header">{{ slot }}</div>
+          <div class="slot-status">
+            <ng-container *ngIf="isReserved(date, parking.id, slot)">
+              <div class="reserved">
+                <strong>Réservé par:</strong><br />
+                {{ getReserverName(date, parking.id, slot) }}
+              </div>
+            </ng-container>
+            <ng-container *ngIf="!isReserved(date, parking.id, slot)">
+              <div class="available">
+                <strong>Disponible</strong><br />
+                <ion-button
+                  size="small"
+                  color="success"
+                  (click)="reserveSlot(parking.id, slot)"
+                >
+                  Réserver
+                </ion-button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Message de succès -->
+  <div *ngIf="successMessage" class="message success">{{ successMessage }}</div>
+</ion-content>
