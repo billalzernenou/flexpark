@@ -88,12 +88,12 @@ export class ReservationPage implements OnInit, AfterViewInit {
   }
 
   initializeDefaultDate() {
-    // Définir la date par défaut à aujourd'hui au format DD/MM/YYYY
+    // Définir la date par défaut à aujourd'hui au format YYYY-MM-DD
     const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
-    this.date = `${day}/${month}/${year}`;
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    this.date = `${year}-${month}-${day}`;
     console.log('Default date set to:', this.date);
   }
 
