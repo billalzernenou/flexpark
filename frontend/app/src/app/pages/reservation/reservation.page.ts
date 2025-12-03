@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -40,7 +40,7 @@ import { AuthService } from '../../services/auth.service';
     FormsModule,
   ],
 })
-export class ReservationPage implements OnInit {
+export class ReservationPage implements OnInit, AfterViewInit {
   date: string | null = null;
   reservations: Reservation[] = [];
   users: { [id: number]: string } = {
@@ -48,11 +48,28 @@ export class ReservationPage implements OnInit {
     2: 'bob@example.com',
   };
   currentUser: any = null;
-  slots = ['08:00-09:00', '09:00-10:00', '10:00-11:00'];
-  parkings = [
-    { id: 1, name: 'Parking Centre' },
-    { id: 2, name: 'Parking Gare' },
-  ];
+  slots: string[] = [];
+  parkings = [{ id: 1, name: 'Centre Parking' }];
+
+  ngAfterViewInit() {
+    this.generatePlaces();
+  }
+
+  generatePlaces() {
+    this.slots = [];
+    // Rangée A: A1-A5 (5 places)
+    for (let i = 1; i <= 5; i++) {
+      this.slots.push(`A${i}`);
+    }
+    // Rangée B: B1-B4 (4 places)
+    for (let i = 1; i <= 4; i++) {
+      this.slots.push(`B${i}`);
+    }
+    // Rangée C: C1-C3 (3 places)
+    for (let i = 1; i <= 3; i++) {
+      this.slots.push(`C${i}`);
+    }
+  }
   selectedParking: number = 1;
   selectedSlot: string | null = null;
   successMessage = '';
