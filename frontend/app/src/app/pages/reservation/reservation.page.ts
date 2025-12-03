@@ -48,7 +48,7 @@ export class ReservationPage implements OnInit {
     2: 'bob@example.com',
   };
   currentUser: any = null;
-  slots = ['Journée complète'];
+  slots = ['08:00-09:00', '09:00-10:00', '10:00-11:00'];
   parkings = [
     { id: 1, name: 'Parking Centre' },
     { id: 2, name: 'Parking Gare' },
