@@ -1,19 +1,17 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { addIcons } from 'ionicons';
+import { addCircle, list } from 'ionicons/icons';
 import {
   IonButton,
   IonContent,
   IonHeader,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonList,
   IonTitle,
   IonToolbar,
   IonDatetime,
+  IonIcon,
 } from '@ionic/angular/standalone';
-
 import {
   ReservationService,
   Reservation,
@@ -31,16 +29,65 @@ import { AuthService } from '../../services/auth.service';
     IonTitle,
     IonToolbar,
     IonButton,
-    IonItem,
-    IonLabel,
-    IonInput,
-    IonList,
     IonDatetime,
+    IonIcon,
     CommonModule,
     FormsModule,
   ],
 })
 export class ReservationPage implements OnInit, AfterViewInit {
+  onDateChange(newDate: string) {
+    this.date = newDate;
+    this.loadReservations(newDate);
+  }
+  // Liste des pages pour la pagination
+  getUserReservationsPages(): number[] {
+    const total = this.getUserReservationsTotalPages();
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  goToReservationPage(page: number) {
+    if (page >= 1 && page <= this.getUserReservationsTotalPages()) {
+      this.reservationPage = page;
+    }
+  }
+  // Pagination pour mes réservations
+  reservationPage: number = 1;
+  reservationPageSize: number = 5;
+
+  getUserReservationsPaginated(): Reservation[] {
+    const all = this.getUserReservations();
+    const start = (this.reservationPage - 1) * this.reservationPageSize;
+    return all.slice(start, start + this.reservationPageSize);
+  }
+
+  getUserReservationsTotalPages(): number {
+    return (
+      Math.ceil(this.getUserReservations().length / this.reservationPageSize) ||
+      1
+    );
+  }
+
+  nextReservationPage() {
+    if (this.reservationPage < this.getUserReservationsTotalPages()) {
+      this.reservationPage++;
+    }
+  }
+
+  prevReservationPage() {
+    if (this.reservationPage > 1) {
+      this.reservationPage--;
+    }
+  }
+  // Vérifie si une réservation est passée (date < aujourd'hui)
+  isPastReservation(reservation: Reservation): boolean {
+    const today = new Date();
+    const resDate = new Date(reservation.date);
+    // On compare uniquement la date (pas l'heure)
+    return (
+      resDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    );
+  }
   date: string | null = null;
   reservations: Reservation[] = [];
   users: { [id: number]: string } = {
@@ -50,6 +97,11 @@ export class ReservationPage implements OnInit, AfterViewInit {
   currentUser: any = null;
   slots: string[] = [];
   parkings = [{ id: 1, name: 'Centre Parking' }];
+  activeTab: string = 'reserver';
+
+  // Pour la modale de confirmation
+  showCancelModal: boolean = false;
+  cancelTargetId: number | null = null;
 
   ngAfterViewInit() {
     this.generatePlaces();
@@ -77,14 +129,18 @@ export class ReservationPage implements OnInit, AfterViewInit {
   constructor(
     private reservationService: ReservationService,
     private authService: AuthService
-  ) {}
+  ) {
+    addIcons({ addCircle, list });
+  }
 
   ngOnInit() {
     console.log('ReservationPage ngOnInit');
-    this.loadReservations();
     this.loadCurrentUser();
     // Initialiser la date avec aujourd'hui (3 décembre 2025)
     this.initializeDefaultDate();
+    if (this.date) {
+      this.loadReservations(this.date);
+    }
   }
 
   initializeDefaultDate() {
@@ -97,9 +153,9 @@ export class ReservationPage implements OnInit, AfterViewInit {
     console.log('Default date set to:', this.date);
   }
 
-  loadReservations() {
-    console.log('Loading reservations...');
-    this.reservationService.getReservations().subscribe(
+  loadReservations(date?: string) {
+    console.log('Loading reservations...' + (date ? ' for date ' + date : ''));
+    this.reservationService.getReservations(date).subscribe(
       (res) => {
         console.log('Reservations loaded:', res);
         this.reservations = res;
@@ -134,6 +190,28 @@ export class ReservationPage implements OnInit, AfterViewInit {
     return res ? this.users[res.user_id] || 'Utilisateur #' + res.user_id : '';
   }
 
+  getReservationId(date: string, parkingId: number, slot: string): number {
+    const res = this.getReservationsFor(date, parkingId, slot)[0];
+    return res ? res.id : 0;
+  }
+
+  getUserReservations(): Reservation[] {
+    if (!this.currentUser) return [];
+    return this.reservations
+      .filter((r) => r.user_id === this.currentUser.id)
+      .sort((a, b) => {
+        // Tri décroissant (plus récente d'abord)
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateB - dateA;
+      });
+  }
+
+  getParkingName(parkingId: number): string {
+    const parking = this.parkings.find((p) => p.id === parkingId);
+    return parking ? parking.name : `Parking #${parkingId}`;
+  }
+
   reserveSlot(parkingId: number, slot: string) {
     if (!this.date) {
       console.error('No date selected');
@@ -165,7 +243,7 @@ export class ReservationPage implements OnInit, AfterViewInit {
       .subscribe(
         () => {
           console.log('Reservation created successfully');
-          this.loadReservations();
+          this.loadReservations(this.date ?? undefined); // Recharge les réservations du jour
           this.successMessage = `Réservation confirmée pour le créneau ${slot}`;
         },
         (error) => {
@@ -173,5 +251,35 @@ export class ReservationPage implements OnInit, AfterViewInit {
           this.successMessage = 'Erreur lors de la réservation';
         }
       );
+  }
+
+  cancelReservation(reservationId: number) {
+    this.cancelTargetId = reservationId;
+    this.showCancelModal = true;
+  }
+
+  confirmCancelReservation() {
+    if (this.cancelTargetId) {
+      this.reservationService.deleteReservation(this.cancelTargetId).subscribe(
+        () => {
+          console.log('Reservation cancelled successfully');
+          this.loadReservations();
+          this.successMessage = 'Réservation annulée avec succès';
+          this.showCancelModal = false;
+          this.cancelTargetId = null;
+        },
+        (error) => {
+          console.error('Error cancelling reservation:', error);
+          this.successMessage = "Erreur lors de l'annulation de la réservation";
+          this.showCancelModal = false;
+          this.cancelTargetId = null;
+        }
+      );
+    }
+  }
+
+  closeCancelModal() {
+    this.showCancelModal = false;
+    this.cancelTargetId = null;
   }
 }

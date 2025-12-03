@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -23,6 +23,30 @@ def create_reservation(reservation: schemas.ReservationCreate, db: Session = Dep
     db.refresh(new_res)
     return new_res
 
+
 @router.get("/reservation", response_model=list[schemas.ReservationOut])
-def list_reservations(db: Session = Depends(get_db)):
-    return db.query(models.Reservation).all()
+def list_reservations(
+    db: Session = Depends(get_db),
+    user_id: int = Query(None, description="ID de l'utilisateur"),
+    date: str = Query(None, description="Date au format YYYY-MM-DD"),
+    page: int = Query(1, ge=1, description="Numéro de page"),
+    page_size: int = Query(10, ge=1, le=100, description="Taille de la page")
+):
+    query = db.query(models.Reservation)
+    if user_id:
+        query = query.filter(models.Reservation.user_id == user_id)
+    if date:
+        query = query.filter(models.Reservation.date == date)
+    query = query.order_by(models.Reservation.date.desc())
+    total = query.count()
+    reservations = query.offset((page - 1) * page_size).limit(page_size).all()
+    return reservations
+
+@router.delete("/reservation/{id}")
+def delete_reservation(id: int, db: Session = Depends(get_db)):
+    reservation = db.query(models.Reservation).filter(models.Reservation.id == id).first()
+    if not reservation:
+        raise HTTPException(status_code=404, detail="Réservation non trouvée")
+    db.delete(reservation)
+    db.commit()
+    return {"message": "Réservation annulée avec succès"}

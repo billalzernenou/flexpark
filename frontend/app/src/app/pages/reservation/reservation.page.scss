@@ -1,3 +1,92 @@
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+.past-reservation {
+  background: #f3f3f3;
+  border-left: 5px solid #bdbdbd;
+  opacity: 0.8;
+}
+.status-badge.past {
+  background: #bdbdbd;
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+// Modale personnalisée d'annulation
+.custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1;
+}
+
+.custom-modal-content {
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(26, 42, 74, 0.18);
+  padding: 32px 24px 24px 24px;
+  min-width: 280px;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.custom-modal-content h3 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  color: #c62828;
+}
+.custom-modal-content p {
+  margin-bottom: 18px;
+  color: #222;
+}
+.custom-modal-actions {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+// Centrage du bouton d'annulation
+.cancel-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.cancel-btn {
+  --border-radius: 18px;
+  --padding-start: 18px;
+  --padding-end: 18px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(198, 40, 40, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cancel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(198, 40, 40, 0.18);
+}
 // Racine
 
 $main-blue: #1a2a4a;
@@ -14,6 +103,50 @@ $spot-size: 120px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+// Styles pour les onglets
+.tabs-header {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e0e0e0;
+  background: #fff;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #999;
+  font-size: 0.9rem;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+
+  ion-icon {
+    font-size: 24px;
+  }
+
+  &.active {
+    color: $main-blue;
+    border-bottom-color: $main-blue;
+    font-weight: 600;
+  }
+
+  &:hover {
+    color: #666;
+  }
+}
+
+.tab-content {
+  display: block;
 }
 
 .card {
@@ -316,4 +449,95 @@ $spot-size: 120px;
   border-radius: 8px;
   margin-top: 20px;
   text-align: center;
+}
+
+// Styles pour les onglets
+ion-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+ion-tab-bar {
+  border-top: 1px solid #e0e0e0;
+}
+
+ion-tab-button {
+  --color: #999;
+  --color-selected: #1a2a4a;
+  font-size: 0.85rem;
+
+  &.active {
+    --color: #1a2a4a;
+    --background-focused: transparent;
+  }
+}
+
+.ion-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+// Styles pour la liste des réservations
+.reservations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reservation-card {
+  padding: 18px 24px;
+  background: #fff;
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  border-left: 4px solid #1a2a4a;
+
+  .reservation-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .reservation-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+
+    strong {
+      color: #1a2a4a;
+      min-width: 100px;
+    }
+
+    .status-badge {
+      background: #d4edda;
+      color: #155724;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.no-reservations {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+
+  p {
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.user-card {
+  margin-bottom: 16px;
+  background: $light-blue;
+  border: 1px solid #d0dff0;
+
+  .user-info {
+    color: $main-blue;
+    font-size: 0.95rem;
+  }
 }

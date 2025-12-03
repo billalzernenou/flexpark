@@ -17,9 +17,13 @@ export class ReservationService {
 
   constructor(private http: HttpClient) {}
 
-  getReservations(): Observable<Reservation[]> {
-    console.log('Fetching reservations from:', this.apiUrl);
-    return this.http.get<Reservation[]>(this.apiUrl);
+  getReservations(date?: string): Observable<Reservation[]> {
+    let url = this.apiUrl;
+    if (date) {
+      url += `?date=${date}`;
+    }
+    console.log('Fetching reservations from:', url);
+    return this.http.get<Reservation[]>(url);
   }
 
   createReservation(
@@ -27,5 +31,10 @@ export class ReservationService {
   ): Observable<Reservation> {
     console.log('Creating reservation:', reservation);
     return this.http.post<Reservation>(this.apiUrl, reservation);
+  }
+
+  deleteReservation(id: number): Observable<any> {
+    console.log('Deleting reservation:', id);
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
