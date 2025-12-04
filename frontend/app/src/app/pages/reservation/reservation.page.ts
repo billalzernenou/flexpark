@@ -40,7 +40,27 @@ import { AuthService } from '../../services/auth.service';
 export class ReservationPage implements OnInit, AfterViewInit {
   onDateChange(newDate: string) {
     this.date = newDate;
-    this.loadReservations(newDate);
+    // Convertir la date au format YYYY-MM-DD pour l'API
+    let dateForApi = newDate;
+    // Extraire la partie date si c'est un format ISO (avec T et time)
+    if (dateForApi && dateForApi.includes('T')) {
+      dateForApi = dateForApi.split('T')[0];
+    }
+    // Convertir DD/MM/YYYY en YYYY-MM-DD
+    else if (dateForApi && dateForApi.includes('/')) {
+      const parts = dateForApi.split('/');
+      dateForApi = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    this.dateForApi = dateForApi;
+    this.loadReservations(dateForApi);
+  }
+
+  // Recharger les réservations quand on revient à l'onglet "reserver"
+  onTabChange(tabName: string) {
+    this.activeTab = tabName;
+    if (tabName === 'reserver' && this.dateForApi) {
+      this.loadReservations(this.dateForApi ?? undefined);
+    }
   }
   // Liste des pages pour la pagination
   getUserReservationsPages(): number[] {
@@ -111,6 +131,43 @@ export class ReservationPage implements OnInit, AfterViewInit {
       resDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())
     );
   }
+
+  // Vérifie si une date (format YYYY-MM-DD) est dans le passé
+  isDateInPast(dateStr?: string | null): boolean {
+    if (!dateStr) return false;
+    // Assure le format YYYY-MM-DD
+    const parts = dateStr.includes('/')
+      ? dateStr.split('/')
+      : dateStr.split('-');
+    let year: number, month: number, day: number;
+    if (parts.length === 3) {
+      if (dateStr.includes('/')) {
+        // DD/MM/YYYY
+        day = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10) - 1;
+        year = parseInt(parts[2], 10);
+      } else {
+        // YYYY-MM-DD
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10) - 1;
+        day = parseInt(parts[2], 10);
+      }
+    } else {
+      return false;
+    }
+    const given = new Date(year, month, day);
+    const today = new Date();
+    const todayOnly = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    return given < todayOnly;
+  }
+
+  // Date stockée en interne au format YYYY-MM-DD pour l'API
+  dateForApi: string | null = null;
+  // Date affichée (peut être en DD/MM/YYYY avec ion-datetime)
   date: string | null = null;
   reservations: Reservation[] = [];
   users: { [id: number]: string } = {
@@ -162,14 +219,14 @@ export class ReservationPage implements OnInit, AfterViewInit {
   ngOnInit() {
     console.log('ReservationPage ngOnInit');
     this.loadCurrentUser();
-    // Initialiser la date avec aujourd'hui (3 décembre 2025)
+    // Initialiser la date avec aujourd'hui au format YYYY-MM-DD
     this.initializeDefaultDate();
     // Charger la première page des réservations de l'utilisateur
     if (this.currentUser) {
       this.loadUserReservationsPage(1);
     }
-    if (this.date) {
-      this.loadReservations(this.date);
+    if (this.dateForApi) {
+      this.loadReservations(this.dateForApi);
     }
   }
 
@@ -179,8 +236,9 @@ export class ReservationPage implements OnInit, AfterViewInit {
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
-    this.date = `${year}-${month}-${day}`;
-    console.log('Default date set to:', this.date);
+    this.dateForApi = `${year}-${month}-${day}`;
+    this.date = this.dateForApi; // Initialiser aussi la date affichée
+    console.log('Default date set to:', this.dateForApi);
   }
 
   loadReservations(date?: string) {
@@ -206,9 +264,10 @@ export class ReservationPage implements OnInit, AfterViewInit {
   }
 
   getReservationsFor(date: string, parkingId: number, slot: string) {
-    return this.reservations.filter(
+    const result = this.reservations.filter(
       (r) => r.date === date && r.parking_id === parkingId && r.slot === slot
     );
+    return result;
   }
 
   isReserved(date: string, parkingId: number, slot: string) {
@@ -243,18 +302,12 @@ export class ReservationPage implements OnInit, AfterViewInit {
   }
 
   reserveSlot(parkingId: number, slot: string) {
-    if (!this.date) {
+    if (!this.dateForApi) {
       console.error('No date selected');
       return;
     }
 
-    // Convertir le format de date si nécessaire
-    let dateStr = this.date;
-    if (dateStr.includes('/')) {
-      // Format DD/MM/YYYY -> YYYY-MM-DD
-      const parts = dateStr.split('/');
-      dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
+    const dateStr = this.dateForApi;
 
     console.log('Reserving slot:', {
       dateStr,
@@ -262,6 +315,15 @@ export class ReservationPage implements OnInit, AfterViewInit {
       parking: parkingId,
       user: this.currentUser.id,
     });
+
+    // Protection côté client : empêcher les réservations pour des dates passées
+    if (this.isDateInPast(this.dateForApi)) {
+      this.presentToast(
+        'Impossible de réserver pour une date passée.',
+        'warning'
+      );
+      return;
+    }
 
     this.reservationService
       .createReservation({
@@ -273,7 +335,7 @@ export class ReservationPage implements OnInit, AfterViewInit {
       .subscribe(
         () => {
           console.log('Reservation created successfully');
-          this.loadReservations(this.date ?? undefined); // Recharge les réservations du jour
+          this.loadReservations(this.dateForApi ?? undefined); // Recharge les réservations du jour
           this.loadUserReservationsPage(this.reservationPage); // Recharge la page utilisateur
           this.presentToast(
             `Réservation confirmée pour le créneau ${slot}`,
@@ -304,7 +366,7 @@ export class ReservationPage implements OnInit, AfterViewInit {
       this.reservationService.deleteReservation(this.cancelTargetId).subscribe(
         () => {
           console.log('Reservation cancelled successfully');
-          this.loadReservations(this.date ?? undefined);
+          this.loadReservations(this.dateForApi ?? undefined);
           this.loadUserReservationsPage(this.reservationPage);
           this.presentToast('Réservation annulée avec succès', 'success');
           this.showCancelModal = false;
@@ -329,6 +391,18 @@ export class ReservationPage implements OnInit, AfterViewInit {
   closeCancelModal() {
     this.showCancelModal = false;
     this.cancelTargetId = null;
+  }
+
+  // Convertit une date au format de display lisible (DD/MM/YYYY)
+  getDateDisplay(dateStr?: string | null): string {
+    if (!dateStr) return '';
+    // Si format YYYY-MM-DD, convertir en DD/MM/YYYY
+    if (dateStr.includes('-') && !dateStr.includes('/')) {
+      const parts = dateStr.split('-');
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    // Si format DD/MM/YYYY, retourner tel quel
+    return dateStr;
   }
 
   // Affiche un toast contrôlé par la template (<ion-toast [isOpen]="showToast" ...>)

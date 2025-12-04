@@ -31,7 +31,11 @@ export class ReservationService {
     let url = this.apiUrl;
     const query: string[] = [];
     if (params) {
-      if (params.date) query.push(`date=${params.date}`);
+      // Extraire seulement la partie date (YYYY-MM-DD) si présente
+      if (params.date) {
+        const dateOnly = params.date.split('T')[0]; // Retire la partie heure (après le T)
+        query.push(`date=${dateOnly}`);
+      }
       if (params.user_id) query.push(`user_id=${params.user_id}`);
       if (params.page) query.push(`page=${params.page}`);
       if (params.page_size) query.push(`page_size=${params.page_size}`);

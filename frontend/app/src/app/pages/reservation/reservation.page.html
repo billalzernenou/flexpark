@@ -29,7 +29,7 @@
     <button
       class="tab-button"
       [class.active]="activeTab === 'reserver'"
-      (click)="activeTab = 'reserver'"
+      (click)="onTabChange('reserver')"
     >
       <ion-icon name="add-circle"></ion-icon>
       <span>Réserver</span>
@@ -37,7 +37,7 @@
     <button
       class="tab-button"
       [class.active]="activeTab === 'mes-reservations'"
-      (click)="activeTab = 'mes-reservations'"
+      (click)="onTabChange('mes-reservations')"
     >
       <ion-icon name="list"></ion-icon>
       <span>Mes réservations</span>
@@ -81,40 +81,49 @@
       </section>
 
       <!-- Affichage des créneaux et réservations -->
-      <section class="card slots-card" *ngIf="date">
-        <h2>Créneaux disponibles pour {{ date }}</h2>
+      <section class="card slots-card" *ngIf="dateForApi">
+        <h2>Créneaux disponibles pour {{ getDateDisplay(dateForApi) }}</h2>
 
         <!-- Pour chaque parking -->
         <div *ngFor="let parking of parkings" class="parking-section">
           <h3>{{ parking.name }}</h3>
           <div class="slots-grid">
             <!-- Pour chaque créneau horaire -->
-            <div *ngFor="let slot of slots" class="slot-item">
+            <div
+              *ngFor="let slot of slots"
+              class="slot-item"
+              [ngClass]="{ 'past-slot': isDateInPast(dateForApi) }"
+            >
               <div class="slot-header">{{ slot }}</div>
               <div class="slot-status">
-                <ng-container *ngIf="isReserved(date, parking.id, slot)">
+                <ng-container *ngIf="isReserved(dateForApi, parking.id, slot)">
                   <div class="reserved">
                     <strong>Réservé par:</strong><br />
-                    {{ getReserverName(date, parking.id, slot) }}<br />
+                    {{ getReserverName(dateForApi, parking.id, slot) }}<br />
                     <div class="cancel-btn-wrapper">
                       <ion-button
                         size="small"
                         color="danger"
                         class="cancel-btn"
-                        (click)="cancelReservation(getReservationId(date, parking.id, slot))"
+                        (click)="cancelReservation(getReservationId(dateForApi, parking.id, slot))"
                       >
                         Annuler
                       </ion-button>
                     </div>
                   </div>
                 </ng-container>
-                <ng-container *ngIf="!isReserved(date, parking.id, slot)">
+                <ng-container *ngIf="!isReserved(dateForApi, parking.id, slot)">
                   <div class="available">
-                    <strong>Disponible</strong><br />
+                    <strong *ngIf="!isDateInPast(dateForApi)"
+                      >Disponible</strong
+                    >
+                    <strong *ngIf="isDateInPast(dateForApi)">Date passée</strong
+                    ><br />
                     <ion-button
                       size="small"
                       color="success"
                       (click)="reserveSlot(parking.id, slot)"
+                      [disabled]="isDateInPast(dateForApi)"
                     >
                       Réserver
                     </ion-button>
@@ -142,7 +151,7 @@
           >
             <div class="reservation-info">
               <div class="reservation-row">
-                <strong>Date:</strong> {{ reservation.date }}
+                <strong>Date:</strong> {{ getDateDisplay(reservation.date) }}
               </div>
               <div class="reservation-row">
                 <strong>Créneau:</strong> {{ reservation.slot }}
