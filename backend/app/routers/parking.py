@@ -24,7 +24,7 @@ def create_reservation(reservation: schemas.ReservationCreate, db: Session = Dep
     return new_res
 
 
-@router.get("/reservation", response_model=list[schemas.ReservationOut])
+@router.get("/reservation", response_model=schemas.ReservationPageOut)
 def list_reservations(
     db: Session = Depends(get_db),
     user_id: int = Query(None, description="ID de l'utilisateur"),
@@ -40,7 +40,7 @@ def list_reservations(
     query = query.order_by(models.Reservation.date.desc())
     total = query.count()
     reservations = query.offset((page - 1) * page_size).limit(page_size).all()
-    return reservations
+    return {"total": total, "items": reservations}
 
 @router.delete("/reservation/{id}")
 def delete_reservation(id: int, db: Session = Depends(get_db)):

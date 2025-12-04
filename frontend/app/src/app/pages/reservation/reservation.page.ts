@@ -48,35 +48,56 @@ export class ReservationPage implements OnInit, AfterViewInit {
 
   goToReservationPage(page: number) {
     if (page >= 1 && page <= this.getUserReservationsTotalPages()) {
-      this.reservationPage = page;
+      this.loadUserReservationsPage(page);
     }
   }
   // Pagination pour mes réservations
   reservationPage: number = 1;
-  reservationPageSize: number = 5;
+  reservationPageSize: number = 10;
+  userReservations: Reservation[] = [];
+  userReservationsTotal: number = 0;
 
-  getUserReservationsPaginated(): Reservation[] {
-    const all = this.getUserReservations();
-    const start = (this.reservationPage - 1) * this.reservationPageSize;
-    return all.slice(start, start + this.reservationPageSize);
+  // Charge une page des réservations de l'utilisateur depuis l'API
+  loadUserReservationsPage(page: number = 1) {
+    if (!this.currentUser) {
+      return;
+    }
+    this.reservationService
+      .getReservations({
+        user_id: this.currentUser.id,
+        page,
+        page_size: this.reservationPageSize,
+      })
+      .subscribe(
+        (res) => {
+          this.userReservations = res.items;
+          this.userReservationsTotal = res.total;
+          this.reservationPage = page;
+        },
+        (err) => {
+          console.error('Error loading user reservations page:', err);
+          this.userReservations = [];
+          this.userReservationsTotal = 0;
+        }
+      );
   }
 
   getUserReservationsTotalPages(): number {
-    return (
-      Math.ceil(this.getUserReservations().length / this.reservationPageSize) ||
-      1
+    return Math.max(
+      1,
+      Math.ceil(this.userReservationsTotal / this.reservationPageSize)
     );
   }
 
   nextReservationPage() {
     if (this.reservationPage < this.getUserReservationsTotalPages()) {
-      this.reservationPage++;
+      this.loadUserReservationsPage(this.reservationPage + 1);
     }
   }
 
   prevReservationPage() {
     if (this.reservationPage > 1) {
-      this.reservationPage--;
+      this.loadUserReservationsPage(this.reservationPage - 1);
     }
   }
   // Vérifie si une réservation est passée (date < aujourd'hui)
@@ -138,6 +159,10 @@ export class ReservationPage implements OnInit, AfterViewInit {
     this.loadCurrentUser();
     // Initialiser la date avec aujourd'hui (3 décembre 2025)
     this.initializeDefaultDate();
+    // Charger la première page des réservations de l'utilisateur
+    if (this.currentUser) {
+      this.loadUserReservationsPage(1);
+    }
     if (this.date) {
       this.loadReservations(this.date);
     }
@@ -155,10 +180,10 @@ export class ReservationPage implements OnInit, AfterViewInit {
 
   loadReservations(date?: string) {
     console.log('Loading reservations...' + (date ? ' for date ' + date : ''));
-    this.reservationService.getReservations(date).subscribe(
+    this.reservationService.getReservations({ date }).subscribe(
       (res) => {
         console.log('Reservations loaded:', res);
-        this.reservations = res;
+        this.reservations = res.items;
       },
       (error) => {
         console.error('Error loading reservations:', error);
@@ -244,6 +269,7 @@ export class ReservationPage implements OnInit, AfterViewInit {
         () => {
           console.log('Reservation created successfully');
           this.loadReservations(this.date ?? undefined); // Recharge les réservations du jour
+          this.loadUserReservationsPage(this.reservationPage); // Recharge la page utilisateur
           this.successMessage = `Réservation confirmée pour le créneau ${slot}`;
         },
         (error) => {
@@ -263,7 +289,8 @@ export class ReservationPage implements OnInit, AfterViewInit {
       this.reservationService.deleteReservation(this.cancelTargetId).subscribe(
         () => {
           console.log('Reservation cancelled successfully');
-          this.loadReservations();
+          this.loadReservations(this.date ?? undefined);
+          this.loadUserReservationsPage(this.reservationPage);
           this.successMessage = 'Réservation annulée avec succès';
           this.showCancelModal = false;
           this.cancelTargetId = null;

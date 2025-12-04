@@ -11,19 +11,36 @@ export interface Reservation {
   parking_id: number;
 }
 
+export interface ReservationPage {
+  total: number;
+  items: Reservation[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReservationService {
   private apiUrl = `${environment.apiUrl}/parkings/reservation`;
 
   constructor(private http: HttpClient) {}
 
-  getReservations(date?: string): Observable<Reservation[]> {
+  getReservations(params?: {
+    date?: string;
+    user_id?: number;
+    page?: number;
+    page_size?: number;
+  }): Observable<ReservationPage> {
     let url = this.apiUrl;
-    if (date) {
-      url += `?date=${date}`;
+    const query: string[] = [];
+    if (params) {
+      if (params.date) query.push(`date=${params.date}`);
+      if (params.user_id) query.push(`user_id=${params.user_id}`);
+      if (params.page) query.push(`page=${params.page}`);
+      if (params.page_size) query.push(`page_size=${params.page_size}`);
+    }
+    if (query.length > 0) {
+      url += '?' + query.join('&');
     }
     console.log('Fetching reservations from:', url);
-    return this.http.get<Reservation[]>(url);
+    return this.http.get<ReservationPage>(url);
   }
 
   createReservation(
