@@ -5,6 +5,16 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- Toast contrôlé par le composant -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [color]="toastColor"
+    position="bottom"
+    duration="3000"
+    (didDismiss)="showToast = false"
+  ></ion-toast>
+
   <!-- Utilisateur connecté - Always visible -->
   <div class="ion-padding">
     <section class="card user-card" *ngIf="currentUser">
@@ -115,11 +125,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Message de succès -->
-      <div *ngIf="successMessage" class="message success">
-        {{ successMessage }}
-      </div>
     </div>
   </div>
 

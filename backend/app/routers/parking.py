@@ -17,6 +17,18 @@ def create_parking(parking: schemas.ParkingCreate, db: Session = Depends(get_db)
 # --- Reservation endpoints ---
 @router.post("/reservation", response_model=schemas.ReservationOut)
 def create_reservation(reservation: schemas.ReservationCreate, db: Session = Depends(get_db)):
+    # Vérifier si l'utilisateur a déjà une réservation pour cette date
+    existing_reservation = db.query(models.Reservation).filter(
+        models.Reservation.user_id == reservation.user_id,
+        models.Reservation.date == reservation.date
+    ).first()
+
+    if existing_reservation:
+        raise HTTPException(
+            status_code=400,
+            detail="Vous avez déjà une réservation pour cette date. Veuillez annuler votre réservation actuelle pour en créer une autre."
+        )
+
     new_res = models.Reservation(**reservation.dict())
     db.add(new_res)
     db.commit()

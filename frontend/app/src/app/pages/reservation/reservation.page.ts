@@ -12,6 +12,7 @@ import {
   IonDatetime,
   IonIcon,
 } from '@ionic/angular/standalone';
+import { IonToast } from '@ionic/angular/standalone';
 import {
   ReservationService,
   Reservation,
@@ -31,6 +32,7 @@ import { AuthService } from '../../services/auth.service';
     IonButton,
     IonDatetime,
     IonIcon,
+    IonToast,
     CommonModule,
     FormsModule,
   ],
@@ -145,7 +147,10 @@ export class ReservationPage implements OnInit, AfterViewInit {
   }
   selectedParking: number = 1;
   selectedSlot: string | null = null;
-  successMessage = '';
+  // Toast control
+  toastMessage: string = '';
+  toastColor: 'success' | 'danger' | 'warning' | 'info' = 'info';
+  showToast: boolean = false;
 
   constructor(
     private reservationService: ReservationService,
@@ -270,11 +275,21 @@ export class ReservationPage implements OnInit, AfterViewInit {
           console.log('Reservation created successfully');
           this.loadReservations(this.date ?? undefined); // Recharge les réservations du jour
           this.loadUserReservationsPage(this.reservationPage); // Recharge la page utilisateur
-          this.successMessage = `Réservation confirmée pour le créneau ${slot}`;
+          this.presentToast(
+            `Réservation confirmée pour le créneau ${slot}`,
+            'success'
+          );
         },
         (error) => {
           console.error('Error creating reservation:', error);
-          this.successMessage = 'Erreur lors de la réservation';
+          // Extraire un message d'erreur utile si possible
+          const errorMessage =
+            (error &&
+              error.error &&
+              (error.error.detail || error.error.message)) ||
+            error?.message ||
+            'Erreur lors de la réservation';
+          this.presentToast(errorMessage, 'danger');
         }
       );
   }
@@ -291,13 +306,19 @@ export class ReservationPage implements OnInit, AfterViewInit {
           console.log('Reservation cancelled successfully');
           this.loadReservations(this.date ?? undefined);
           this.loadUserReservationsPage(this.reservationPage);
-          this.successMessage = 'Réservation annulée avec succès';
+          this.presentToast('Réservation annulée avec succès', 'success');
           this.showCancelModal = false;
           this.cancelTargetId = null;
         },
         (error) => {
           console.error('Error cancelling reservation:', error);
-          this.successMessage = "Erreur lors de l'annulation de la réservation";
+          const errorMessage =
+            (error &&
+              error.error &&
+              (error.error.detail || error.error.message)) ||
+            error?.message ||
+            "Erreur lors de l'annulation de la réservation";
+          this.presentToast(errorMessage, 'danger');
           this.showCancelModal = false;
           this.cancelTargetId = null;
         }
@@ -308,5 +329,17 @@ export class ReservationPage implements OnInit, AfterViewInit {
   closeCancelModal() {
     this.showCancelModal = false;
     this.cancelTargetId = null;
+  }
+
+  // Affiche un toast contrôlé par la template (<ion-toast [isOpen]="showToast" ...>)
+  presentToast(
+    message: string,
+    color: 'success' | 'danger' | 'warning' | 'info' = 'info'
+  ) {
+    this.toastMessage = message;
+    this.toastColor = color;
+    this.showToast = true;
+    // Fermer automatiquement après 3s
+    setTimeout(() => (this.showToast = false), 3000);
   }
 }
