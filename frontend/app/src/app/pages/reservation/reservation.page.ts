@@ -175,6 +175,7 @@ export class ReservationPage implements OnInit, AfterViewInit {
     2: 'bob@example.com',
   };
   currentUser: any = null;
+  currentDate: string = '';
   slots: string[] = [];
   parkings = [{ id: 1, name: 'Centre Parking' }];
   activeTab: string = 'reserver';
@@ -219,6 +220,7 @@ export class ReservationPage implements OnInit, AfterViewInit {
   ngOnInit() {
     console.log('ReservationPage ngOnInit');
     this.loadCurrentUser();
+    this.updateCurrentDate();
     // Initialiser la date avec aujourd'hui au format YYYY-MM-DD
     this.initializeDefaultDate();
     // Charger la première page des réservations de l'utilisateur
@@ -228,6 +230,17 @@ export class ReservationPage implements OnInit, AfterViewInit {
     if (this.dateForApi) {
       this.loadReservations(this.dateForApi);
     }
+  }
+
+  updateCurrentDate() {
+    const today = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    };
+    this.currentDate = today.toLocaleDateString('fr-FR', options);
   }
 
   initializeDefaultDate() {
@@ -259,7 +272,13 @@ export class ReservationPage implements OnInit, AfterViewInit {
     // À adapter selon la logique d'authentification réelle
     const user = localStorage.getItem('user');
     if (user) this.currentUser = JSON.parse(user);
-    else this.currentUser = { id: 1, email: 'alice@example.com' }; // fallback démo
+    else
+      this.currentUser = {
+        id: 1,
+        email: 'alice@example.com',
+        firstName: 'Alice',
+        lastName: 'Dupont',
+      }; // fallback démo
     console.log('Current user:', this.currentUser);
   }
 

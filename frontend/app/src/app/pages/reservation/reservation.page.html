@@ -5,6 +5,18 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <!-- Bannière utilisateur -->
+  <div class="user-banner" *ngIf="currentUser">
+    <div class="banner-content">
+      <div class="greeting">
+        <h2>
+          Bienvenue, {{ currentUser.firstName }} {{ currentUser.lastName }}
+        </h2>
+        <p class="date-display">{{ currentDate }}</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast contrôlé par le composant -->
   <ion-toast
     [isOpen]="showToast"
