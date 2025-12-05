@@ -65,6 +65,6 @@ frontend/app/.DS_Store
 frontend/app/Thumbs.db
 
 # backend
-backend/venv
 **/__pycache__/
+**/venv/
 **/.idea/

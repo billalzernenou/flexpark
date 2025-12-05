@@ -1,0 +1,552 @@
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+.past-reservation {
+  background: #f3f3f3;
+  border-left: 5px solid #bdbdbd;
+  opacity: 0.8;
+}
+.status-badge.past {
+  background: #bdbdbd;
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+// Modale personnalisée d'annulation
+.custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1;
+}
+
+.custom-modal-content {
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(26, 42, 74, 0.18);
+  padding: 32px 24px 24px 24px;
+  min-width: 280px;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.custom-modal-content h3 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  color: #c62828;
+}
+.custom-modal-content p {
+  margin-bottom: 18px;
+  color: #222;
+}
+.custom-modal-actions {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+// Centrage du bouton d'annulation
+.cancel-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.cancel-btn {
+  --border-radius: 18px;
+  --padding-start: 18px;
+  --padding-end: 18px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(198, 40, 40, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cancel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(198, 40, 40, 0.18);
+}
+// Racine
+
+$main-blue: #1a2a4a;
+$light-blue: #eaf0fa;
+$card-radius: 16px;
+$card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+$legend-gap: 18px;
+$spot-radius: 12px;
+$spot-size: 120px;
+
+.reservation-root {
+  background: $light-blue;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Styles pour les onglets
+.tabs-header {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e0e0e0;
+  background: #fff;
+  padding: 0;
+  margin: 0;
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #999;
+  font-size: 0.9rem;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+
+  ion-icon {
+    font-size: 24px;
+  }
+
+  &.active {
+    color: $main-blue;
+    border-bottom-color: $main-blue;
+    font-weight: 600;
+  }
+
+  &:hover {
+    color: #666;
+  }
+}
+
+.tab-content {
+  display: block;
+}
+
+.card {
+  background: #fff;
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  margin-bottom: 18px;
+  padding: 18px 24px;
+  &.date-card {
+    display: flex;
+    flex-direction: column;
+    .title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .sub {
+      font-size: 1rem;
+      color: #6b7a99;
+      margin-bottom: 18px;
+    }
+    .date-label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .custom-date {
+      width: 100%;
+      border-radius: 8px;
+      background: #f5f8ff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      margin-bottom: 8px;
+      --background: #f5f8ff;
+      --color: #1a2a4a;
+      --placeholder-color: #b0b8d1;
+    }
+  }
+  &.legend-card {
+    padding: 12px 24px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    .legend-items {
+      display: flex;
+      gap: $legend-gap;
+      align-items: center;
+      .legend-item {
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: 500;
+        color: $main-blue;
+        gap: 8px;
+        .box {
+          display: inline-block;
+          width: 22px;
+          height: 18px;
+          border-radius: 4px;
+          border: 1.5px solid #dbe3f7;
+          margin-right: 8px;
+          &.available {
+            background: #e6fff2;
+            border-color: #7be6b6;
+          }
+          &.reserved {
+            background: #ffeebc;
+            border-color: #ffd86b;
+          }
+          &.premium {
+            background: #c6ffe6;
+            border-color: #2edc7b;
+          }
+          &.occupied {
+            background: #ffd6d6;
+            border-color: #ff6b6b;
+          }
+        }
+      }
+    }
+  }
+}
+
+.parking-panel {
+  padding: 22px;
+  .entrance,
+  .exit {
+    background: $main-blue;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 8px;
+    padding: 8px 0;
+    margin: 12px 0;
+    letter-spacing: 2px;
+  }
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      .row-label {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #1d4ed8;
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 3px 10px rgba(29, 78, 216, 0.12);
+      }
+      .row-spots {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        flex: 1;
+        .spot {
+          height: $spot-size;
+          border-radius: $spot-radius;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          cursor: pointer;
+          transition: transform 0.12s ease, box-shadow 0.12s ease;
+          border: 1px solid rgba(10, 10, 20, 0.04);
+          &:hover {
+            transform: translateY(-3px);
+          }
+          &.selected {
+            outline: 3px solid rgba(34, 197, 94, 0.18);
+            box-shadow: 0 12px 30px rgba(34, 197, 94, 0.08);
+          }
+          .spot-inner {
+            text-align: center;
+            font-weight: 600;
+            .spot-icon {
+              font-size: 20px;
+              margin-bottom: 6px;
+            }
+            .spot-id {
+              font-size: 13px;
+              color: #0b1320;
+            }
+          }
+          .spot-dot {
+            width: 10px;
+            height: 10px;
+            background: #ffbb33;
+            border-radius: 50%;
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            box-shadow: 0 2px 6px rgba(255, 187, 51, 0.16);
+          }
+          &.available {
+            background: #efefef;
+          }
+          &.reserved {
+            background: #ffd66a;
+          }
+          &.premium {
+            background: #44d377;
+          }
+          &.occupied {
+            background: #ff8b95;
+          }
+        }
+      }
+    }
+  }
+  .actions {
+    margin-top: 16px;
+    display: flex;
+  }
+}
+
+.message.success {
+  width: 100%;
+  padding: 10px;
+  background: #e6ffed;
+  border: 1px solid #9fe6b6;
+  border-radius: 6px;
+  color: #0b7a2a;
+  margin-top: 18px;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .parking-panel {
+    .rows {
+      .row {
+        .row-spots {
+          grid-template-columns: repeat(3, 1fr);
+          .spot {
+            height: 84px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Styles pour la nouvelle vue des créneaux
+.user-card {
+  background: #f0f5ff;
+  border-left: 4px solid $main-blue;
+
+  .user-info {
+    font-size: 1rem;
+    color: #1a2a4a;
+  }
+}
+
+.slots-card {
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: $main-blue;
+  }
+
+  .parking-section {
+    margin-bottom: 30px;
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2d3d5a;
+      margin-bottom: 15px;
+    }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+  }
+}
+
+.slot-item {
+  border: 2px solid #e0e6f0;
+  border-radius: 12px;
+  padding: 15px;
+  background: #fafbfc;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: $main-blue;
+    box-shadow: 0 4px 12px rgba(26, 42, 74, 0.1);
+  }
+
+  .slot-header {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: $main-blue;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .slot-status {
+    .reserved {
+      background: #ffe6e6;
+      border: 1px solid #ff9999;
+      border-radius: 8px;
+      padding: 10px;
+      color: #c62828;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .available {
+      background: #e6f7ff;
+      border: 1px solid #99d5ff;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+
+      strong {
+        color: #0066cc;
+      }
+
+      ion-button {
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+/* Griser les créneaux pour les dates passées */
+.slot-item.past-slot {
+  opacity: 0.6;
+}
+
+.slot-item.past-slot .available ion-button {
+  opacity: 0.6;
+}
+
+.message.success {
+  background: #e6ffed;
+  border: 1px solid #9fe6b6;
+  color: #0b7a2a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+// Styles pour les onglets
+ion-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+ion-tab-bar {
+  border-top: 1px solid #e0e0e0;
+}
+
+ion-tab-button {
+  --color: #999;
+  --color-selected: #1a2a4a;
+  font-size: 0.85rem;
+
+  &.active {
+    --color: #1a2a4a;
+    --background-focused: transparent;
+  }
+}
+
+.ion-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+// Styles pour la liste des réservations
+.reservations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reservation-card {
+  padding: 18px 24px;
+  background: #fff;
+  border-radius: $card-radius;
+  box-shadow: $card-shadow;
+  border-left: 4px solid #1a2a4a;
+
+  .reservation-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .reservation-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+
+    strong {
+      color: #1a2a4a;
+      min-width: 100px;
+    }
+
+    .status-badge {
+      background: #d4edda;
+      color: #155724;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.no-reservations {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+
+  p {
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.user-card {
+  margin-bottom: 16px;
+  background: $light-blue;
+  border: 1px solid #d0dff0;
+
+  .user-info {
+    color: $main-blue;
+    font-size: 0.95rem;
+  }
+}

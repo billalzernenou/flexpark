@@ -1,11 +1,28 @@
 from fastapi import FastAPI
-from .database import Base, engine
+from fastapi.middleware.cors import CORSMiddleware
+
+from .database import Base, engine, SessionLocal
 from .routers import auth, parking, news
+
 
 # Créer les tables
 Base.metadata.create_all(bind=engine)
 
+# Seed data si vide
+from .seed import seed_data
+with SessionLocal() as db:
+	seed_data(db)
+
 app = FastAPI(title="FlexPark API")
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # À adapter en production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Routers
 app.include_router(auth.router)

@@ -1,0 +1,246 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Réservation de parking</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Toast contrôlé par le composant -->
+  <ion-toast
+    [isOpen]="showToast"
+    [message]="toastMessage"
+    [color]="toastColor"
+    position="bottom"
+    duration="3000"
+    (didDismiss)="showToast = false"
+  ></ion-toast>
+
+  <!-- Utilisateur connecté - Always visible -->
+  <div class="ion-padding">
+    <section class="card user-card" *ngIf="currentUser">
+      <div class="user-info">
+        <strong>Utilisateur connecté:</strong> {{ currentUser.email }}
+      </div>
+    </section>
+  </div>
+
+  <!-- Tab bar au top -->
+  <div class="tabs-header">
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'reserver'"
+      (click)="onTabChange('reserver')"
+    >
+      <ion-icon name="add-circle"></ion-icon>
+      <span>Réserver</span>
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="activeTab === 'mes-reservations'"
+      (click)="onTabChange('mes-reservations')"
+    >
+      <ion-icon name="list"></ion-icon>
+      <span>Mes réservations</span>
+    </button>
+  </div>
+
+  <!-- Onglet: Réserver -->
+  <div class="tab-content" *ngIf="activeTab === 'reserver'">
+    <div class="ion-padding">
+      <!-- Debug info -->
+      <div
+        style="
+          background: #ffffcc;
+          padding: 10px;
+          border-radius: 8px;
+          margin-bottom: 10px;
+          font-size: 0.9rem;
+        "
+      >
+        <strong>Debug:</strong> Utilisateur={{ currentUser?.email }} |
+        Réservations={{ reservations.length }}
+      </div>
+
+      <!-- Sélection date -->
+      <section class="card date-card">
+        <div class="card-row single">
+          <div class="card-col">
+            <label for="date" class="date-label">Sélectionnez une date</label>
+            <ion-datetime
+              id="date"
+              presentation="date"
+              value-format="YYYY-MM-DD"
+              display-format="DD/MM/YYYY"
+              placeholder="JJ/MM/AAAA"
+              [(ngModel)]="date"
+              (ngModelChange)="onDateChange($event)"
+              class="custom-date"
+            ></ion-datetime>
+          </div>
+        </div>
+      </section>
+
+      <!-- Affichage des créneaux et réservations -->
+      <section class="card slots-card" *ngIf="dateForApi">
+        <h2>Créneaux disponibles pour {{ getDateDisplay(dateForApi) }}</h2>
+
+        <!-- Pour chaque parking -->
+        <div *ngFor="let parking of parkings" class="parking-section">
+          <h3>{{ parking.name }}</h3>
+          <div class="slots-grid">
+            <!-- Pour chaque créneau horaire -->
+            <div
+              *ngFor="let slot of slots"
+              class="slot-item"
+              [ngClass]="{ 'past-slot': isDateInPast(dateForApi) }"
+            >
+              <div class="slot-header">{{ slot }}</div>
+              <div class="slot-status">
+                <ng-container *ngIf="isReserved(dateForApi, parking.id, slot)">
+                  <div class="reserved">
+                    <strong>Réservé par:</strong><br />
+                    {{ getReserverName(dateForApi, parking.id, slot) }}<br />
+                    <div class="cancel-btn-wrapper">
+                      <ion-button
+                        size="small"
+                        color="danger"
+                        class="cancel-btn"
+                        (click)="cancelReservation(getReservationId(dateForApi, parking.id, slot))"
+                      >
+                        Annuler
+                      </ion-button>
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="!isReserved(dateForApi, parking.id, slot)">
+                  <div class="available">
+                    <strong *ngIf="!isDateInPast(dateForApi)"
+                      >Disponible</strong
+                    >
+                    <strong *ngIf="isDateInPast(dateForApi)">Date passée</strong
+                    ><br />
+                    <ion-button
+                      size="small"
+                      color="success"
+                      (click)="reserveSlot(parking.id, slot)"
+                      [disabled]="isDateInPast(dateForApi)"
+                    >
+                      Réserver
+                    </ion-button>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Onglet: Mes réservations -->
+  <div class="tab-content" *ngIf="activeTab === 'mes-reservations'">
+    <div class="ion-padding">
+      <h2>Mes réservations</h2>
+
+      <ng-container *ngIf="userReservations.length > 0; else noReservations">
+        <div class="reservations-list">
+          <section
+            class="card reservation-card"
+            *ngFor="let reservation of userReservations"
+            [ngClass]="{ 'past-reservation': isPastReservation(reservation) }"
+          >
+            <div class="reservation-info">
+              <div class="reservation-row">
+                <strong>Date:</strong> {{ getDateDisplay(reservation.date) }}
+              </div>
+              <div class="reservation-row">
+                <strong>Créneau:</strong> {{ reservation.slot }}
+              </div>
+              <div class="reservation-row">
+                <strong>Parking:</strong>
+                {{ getParkingName(reservation.parking_id) }}
+              </div>
+              <div class="reservation-row">
+                <strong>Statut:</strong>
+                <span
+                  class="status-badge"
+                  *ngIf="!isPastReservation(reservation)"
+                  >Confirmée</span
+                >
+                <span
+                  class="status-badge past"
+                  *ngIf="isPastReservation(reservation)"
+                  >Réservation passée</span
+                >
+              </div>
+            </div>
+            <div
+              class="cancel-btn-wrapper"
+              *ngIf="!isPastReservation(reservation)"
+            >
+              <ion-button
+                color="danger"
+                class="cancel-btn"
+                (click)="cancelReservation(reservation.id)"
+              >
+                Annuler la réservation
+              </ion-button>
+            </div>
+          </section>
+        </div>
+        <!-- Pagination -->
+        <div
+          class="pagination-controls"
+          *ngIf="getUserReservationsTotalPages() > 1"
+        >
+          <ion-button
+            size="small"
+            (click)="prevReservationPage()"
+            [disabled]="reservationPage === 1"
+            >«</ion-button
+          >
+          <ng-container
+            *ngFor="let page of [].constructor(getUserReservationsTotalPages()); let i = index"
+          >
+            <ion-button
+              size="small"
+              [color]="reservationPage === (i+1) ? 'primary' : 'light'"
+              (click)="goToReservationPage(i+1)"
+            >
+              {{ i+1 }}
+            </ion-button>
+          </ng-container>
+          <ion-button
+            size="small"
+            (click)="nextReservationPage()"
+            [disabled]="reservationPage === getUserReservationsTotalPages()"
+            >»</ion-button
+          >
+        </div>
+      </ng-container>
+
+      <ng-template #noReservations>
+        <div class="no-reservations">
+          <p>Vous n'avez aucune réservation pour le moment.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Modale de confirmation d'annulation -->
+  <div class="custom-modal" *ngIf="showCancelModal">
+    <div class="custom-modal-backdrop" (click)="closeCancelModal()"></div>
+    <div class="custom-modal-content">
+      <h3>Confirmer l'annulation</h3>
+      <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
+      <div class="custom-modal-actions">
+        <ion-button color="danger" (click)="confirmCancelReservation()"
+          >Oui, annuler</ion-button
+        >
+        <ion-button color="medium" (click)="closeCancelModal()"
+          >Non, garder</ion-button
+        >
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -9,6 +9,7 @@ class User(Base):
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
 
+
 class Parking(Base):
     __tablename__ = "parkings"
     id = Column(Integer, primary_key=True, index=True)
@@ -18,3 +19,16 @@ class Parking(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User")
+    reservations = relationship("Reservation", back_populates="parking")
+
+
+class Reservation(Base):
+    __tablename__ = "reservations"
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(String, nullable=False)  # Format YYYY-MM-DD
+    slot = Column(String, nullable=False)  # Ex: "08:00-09:00"
+    user_id = Column(Integer, ForeignKey("users.id"))
+    parking_id = Column(Integer, ForeignKey("parkings.id"))
+
+    user = relationship("User")
+    parking = relationship("Parking", back_populates="reservations")

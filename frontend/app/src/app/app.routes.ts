@@ -11,11 +11,20 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'reservation',
+    loadComponent: () =>
+      import('./pages/reservation/reservation.page').then(
+        (m) => m.ReservationPage
+      ),
+  },
+  {
     path: 'register',
-    loadComponent: () => import('./pages/register/register.page').then( m => m.RegisterPage)
+    loadComponent: () =>
+      import('./pages/register/register.page').then((m) => m.RegisterPage),
   },
   {
     path: 'login',
-    loadComponent: () => import('./pages/login/login.page').then( m => m.LoginPage)
+    loadComponent: () =>
+      import('./pages/login/login.page').then((m) => m.LoginPage),
   },
 ];
