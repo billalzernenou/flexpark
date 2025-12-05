@@ -1,20 +1,54 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+    <ion-title>Accueil</ion-title>
+    <ion-button slot="end" (click)="logout()" fill="clear" color="primary">
+      <ion-icon name="log-out-outline"></ion-icon>
+    </ion-button>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <div class="home-container">
+    <!-- User Info Card -->
+    <ion-card *ngIf="currentUser$ | async as user" class="user-card">
+      <ion-card-header>
+        <ion-card-title>Bienvenue {{ user.firstName }}!</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p><strong>Nom:</strong> {{ user.firstName }} {{ user.lastName }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>ID Utilisateur:</strong> {{ user.id }}</p>
+      </ion-card-content>
+    </ion-card>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+    <!-- Main Actions -->
+    <ion-card class="action-card">
+      <ion-card-header>
+        <ion-card-title>Actions</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="full" (click)="goToReservation()" color="primary">
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          Faire une réservation
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Info Card -->
+    <ion-card class="info-card">
+      <ion-card-header>
+        <ion-card-title>À propos de FlexPark</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          FlexPark est une plateforme de réservation de places de parking
+          flexible et facile à utiliser.
+        </p>
+        <p>
+          Connectez-vous et commencez à réserver vos places de parking dès
+          aujourd'hui!
+        </p>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>

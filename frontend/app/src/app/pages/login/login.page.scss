@@ -1,0 +1,271 @@
+$main-blue: #1a2a4a;
+$light-blue: #eaf0fa;
+$dark-blue: #0f1a2e;
+$cyan: #00d4ff;
+$accent: #ff5733;
+
+ion-header {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ion-toolbar {
+    --background: linear-gradient(90deg, #16213e 0%, #1a1a2e 100%);
+    --color: white;
+    --ion-color-primary: #00d4ff;
+
+    ion-title {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+.auth-root {
+  background: linear-gradient(180deg, $light-blue 0%, #f5f8fc 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-banner {
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+  padding: 48px 24px 32px;
+  text-align: center;
+  border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+
+  .banner-content {
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 36px;
+      color: #00d4ff;
+      font-weight: 800;
+      text-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+      letter-spacing: -0.5px;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 14px;
+      color: #aaa;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      animation: fadeIn 0.8s ease-out 0.2s both;
+    }
+  }
+}
+
+.auth-container {
+  flex: 1;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  form {
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+.form-section {
+  margin-bottom: 24px;
+  animation: fadeIn 0.5s ease-out both;
+
+  &:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  &:last-of-type {
+    margin-bottom: 32px;
+  }
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a2a4a;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 0 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 48px;
+
+  &:focus-within {
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1),
+      0 4px 12px rgba(0, 212, 255, 0.15);
+    background: white;
+    transform: translateY(-2px);
+  }
+
+  &:hover:not(:focus-within) {
+    border-color: rgba(0, 212, 255, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .input-icon {
+    font-size: 20px;
+    color: #1a2a4a;
+    margin-right: 8px;
+    flex-shrink: 0;
+    transition: color 0.3s ease;
+  }
+
+  &:focus-within .input-icon {
+    color: #00d4ff;
+  }
+}
+
+.custom-input {
+  flex: 1;
+  --padding-start: 0;
+  --padding-end: 0;
+  font-size: 16px;
+  color: #1a2a4a;
+  font-weight: 500;
+
+  &::placeholder {
+    color: #999;
+  }
+}
+
+.password-toggle {
+  cursor: pointer;
+  color: #1a2a4a;
+  font-size: 20px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+
+  &:active {
+    color: #00d4ff;
+  }
+}
+
+.error-message {
+  margin-top: 6px;
+  padding: 6px 4px;
+  font-size: 12px;
+  color: #ff5733;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
+
+  small {
+    display: block;
+  }
+}
+
+.submit-button {
+  --background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+  --background-activated: linear-gradient(135deg, #0099cc 0%, #006699 100%);
+  --border-radius: 12px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+  margin: 0;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.6s ease-out 0.6s both;
+
+  &:hover:not([disabled]) {
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  &:active:not([disabled]) {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  ion-icon {
+    margin-right: 8px;
+  }
+}
+
+.auth-footer {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 212, 255, 0.1);
+  animation: fadeIn 0.6s ease-out 0.7s both;
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #555;
+
+    .link {
+      font-weight: 700;
+      color: #00d4ff;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s ease, text-shadow 0.2s ease;
+      position: relative;
+
+      &:hover {
+        color: #0099cc;
+        text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+      }
+
+      &:active {
+        color: #0077aa;
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
