@@ -9,6 +9,12 @@ export interface Reservation {
   slot: string;
   user_id: number;
   parking_id: number;
+  user?: {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
 }
 
 export interface ReservationPage {

@@ -7,9 +7,9 @@ def seed_data(db: Session):
     if db.query(User).count() > 0:
         return
 
-    # Utilisateurs
-    user1 = User(email="alice@example.com", password="hashed1")
-    user2 = User(email="bob@example.com", password="hashed2")
+    # Utilisateurs avec noms
+    user1 = User(email="alice@example.com", password="hashed1", firstName="Alice", lastName="Dupont")
+    user2 = User(email="bob@example.com", password="hashed2", firstName="Bob", lastName="Martin")
     db.add_all([user1, user2])
     db.commit()
     db.refresh(user1)

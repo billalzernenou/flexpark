@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { addCircle, list } from 'ionicons/icons';
+import { addCircle, list, logOutOutline } from 'ionicons/icons';
 import {
   IonButton,
   IonContent,
@@ -11,6 +11,8 @@ import {
   IonToolbar,
   IonDatetime,
   IonIcon,
+  IonButtons,
+  IonBackButton,
 } from '@ionic/angular/standalone';
 import { IonToast } from '@ionic/angular/standalone';
 import {
@@ -30,6 +32,8 @@ import { AuthService } from '../../services/auth.service';
     IonTitle,
     IonToolbar,
     IonButton,
+    IonButtons,
+    IonBackButton,
     IonDatetime,
     IonIcon,
     IonToast,
@@ -214,7 +218,7 @@ export class ReservationPage implements OnInit, AfterViewInit {
     private reservationService: ReservationService,
     private authService: AuthService
   ) {
-    addIcons({ addCircle, list });
+    addIcons({ addCircle, list, logOutOutline });
   }
 
   ngOnInit() {
@@ -223,13 +227,15 @@ export class ReservationPage implements OnInit, AfterViewInit {
     this.updateCurrentDate();
     // Initialiser la date avec aujourd'hui au format YYYY-MM-DD
     this.initializeDefaultDate();
-    // Charger la première page des réservations de l'utilisateur
-    if (this.currentUser) {
-      this.loadUserReservationsPage(1);
-    }
-    if (this.dateForApi) {
-      this.loadReservations(this.dateForApi);
-    }
+    // Charger la première page des réservations de l'utilisateur une fois que currentUser est défini
+    setTimeout(() => {
+      if (this.currentUser) {
+        this.loadUserReservationsPage(1);
+      }
+      if (this.dateForApi) {
+        this.loadReservations(this.dateForApi);
+      }
+    }, 100);
   }
 
   updateCurrentDate() {
@@ -269,17 +275,27 @@ export class ReservationPage implements OnInit, AfterViewInit {
   }
 
   loadCurrentUser() {
-    // À adapter selon la logique d'authentification réelle
-    const user = localStorage.getItem('user');
-    if (user) this.currentUser = JSON.parse(user);
-    else
-      this.currentUser = {
-        id: 1,
-        email: 'alice@example.com',
-        firstName: 'Alice',
-        lastName: 'Dupont',
-      }; // fallback démo
-    console.log('Current user:', this.currentUser);
+    // Subscribe to the authenticated user from AuthService
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.currentUser = user;
+      } else {
+        // Fallback to localStorage if available
+        const storedUser = localStorage.getItem('user_data');
+        if (storedUser) {
+          this.currentUser = JSON.parse(storedUser);
+        } else {
+          // Demo fallback
+          this.currentUser = {
+            id: 1,
+            email: 'alice@example.com',
+            firstName: 'Alice',
+            lastName: 'Dupont',
+          };
+        }
+      }
+      console.log('Current user:', this.currentUser);
+    });
   }
 
   getReservationsFor(date: string, parkingId: number, slot: string) {
@@ -295,7 +311,15 @@ export class ReservationPage implements OnInit, AfterViewInit {
 
   getReserverName(date: string, parkingId: number, slot: string) {
     const res = this.getReservationsFor(date, parkingId, slot)[0];
-    return res ? this.users[res.user_id] || 'Utilisateur #' + res.user_id : '';
+    if (!res) return '';
+
+    // Si les données utilisateur sont incluses dans la réservation
+    if (res.user) {
+      return `${res.user.firstName} ${res.user.lastName}`;
+    }
+
+    // Fallback au mapping statique si données utilisateur non disponibles
+    return this.users[res.user_id] || 'Utilisateur #' + res.user_id;
   }
 
   getReservationId(date: string, parkingId: number, slot: string): number {
@@ -434,5 +458,9 @@ export class ReservationPage implements OnInit, AfterViewInit {
     this.showToast = true;
     // Fermer automatiquement après 3s
     setTimeout(() => (this.showToast = false), 3000);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

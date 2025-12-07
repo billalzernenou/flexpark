@@ -36,7 +36,7 @@ def create_reservation(reservation: schemas.ReservationCreate, db: Session = Dep
     return new_res
 
 
-@router.get("/reservation", response_model=schemas.ReservationPageOut)
+@router.get("/reservation", response_model=schemas.ReservationPageWithUserOut)
 def list_reservations(
     db: Session = Depends(get_db),
     user_id: int = Query(None, description="ID de l'utilisateur"),

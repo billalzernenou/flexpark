@@ -4,10 +4,18 @@ from typing import List
 class UserCreate(BaseModel):
     email: str
     password: str
+    firstName: str
+    lastName: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
 
 class UserOut(BaseModel):
     id: int
     email: str
+    firstName: str
+    lastName: str
     model_config = ConfigDict(from_attributes=True)
 
 class ParkingCreate(BaseModel):
@@ -39,8 +47,20 @@ class ReservationOut(BaseModel):
     parking_id: int
     model_config = ConfigDict(from_attributes=True)
 
+class ReservationWithUserOut(BaseModel):
+    id: int
+    date: str
+    slot: str
+    user_id: int
+    parking_id: int
+    user: UserOut
+    model_config = ConfigDict(from_attributes=True)
 
 # Schéma de pagination pour Reservation (total + items)
 class ReservationPageOut(BaseModel):
     total: int
     items: List[ReservationOut]
+
+class ReservationPageWithUserOut(BaseModel):
+    total: int
+    items: List[ReservationWithUserOut]
